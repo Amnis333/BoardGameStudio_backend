@@ -21,7 +21,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     "https://board-game-studio.vercel.app",
-    "BoardGameStudio.ap-northeast-1.elasticbeanstalk.com"
+    "BoardGameStudio.ap-northeast-1.elasticbeanstalk.com",
+    '172.31.0.254',
+    'board-game-studio.net'
 ]
 
 # Application definition
