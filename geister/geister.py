@@ -325,6 +325,7 @@ class Table:
                 destination_x: int = random.randint(0, 7)
                 destination_y: int = random.randint(0, 7)
                 destination = self.__table[destination_y][destination_x]
+                does_capture = False
             # 赤だったら前に出す
             if (
                 not does_capture
