@@ -21,7 +21,7 @@ DEBUG = False
 
 ALLOWED_HOSTS = [
     "https://board-game-studio.vercel.app",
-    "django-env1.eba-tr3jfjut.ap-northeast-1.elasticbeanstalk.com"
+    "BoardGameStudio.ap-northeast-1.elasticbeanstalk.com"
 ]
 
 # Application definition
