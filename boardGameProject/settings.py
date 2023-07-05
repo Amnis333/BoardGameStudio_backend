@@ -24,8 +24,6 @@ ALLOWED_HOSTS = [
     "BoardGameStudio.ap-northeast-1.elasticbeanstalk.com",
     '172.31.0.254',  # EC2のIPアドレス
     'board-game-studio.net',
-    '3.113.206.108',  # GoogleChrome
-    '3.115.74.176',  # Safari
 ]
 
 # Application definition
