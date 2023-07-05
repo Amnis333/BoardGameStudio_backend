@@ -23,6 +23,7 @@ ALLOWED_HOSTS = [
     "https://board-game-studio.vercel.app",
     "BoardGameStudio.ap-northeast-1.elasticbeanstalk.com",
     '172.31.0.254',  # EC2のIPアドレス
+    '172.31.4.164',  # EC2のIPアドレス
     'board-game-studio.net',
 ]
 
