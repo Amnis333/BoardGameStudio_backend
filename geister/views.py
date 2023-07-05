@@ -16,6 +16,10 @@ from .serializers import (
 import json
 
 
+@api_view(["GET"])
+def test(request: Request) -> Response:
+    return Response({"message": "Hello, world!"}, status=status.HTTP_200_OK)
+
 @api_view(["POST"])
 def start_game(request: Request) -> Response:
     player_data = request.data
