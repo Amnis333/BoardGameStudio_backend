@@ -14,6 +14,14 @@ from .serializers import (
 )
 
 import json
+from .models import GameState
+
+
+@api_view(["GET"])
+def get_game_state(_: Request, game_id: int) -> Response:
+    print("game_id", game_id)
+    game_state = GameState.objects.get(id=game_id)
+    return Response(game_state, status=status.HTTP_200_OK)
 
 
 @api_view(["POST"])
@@ -28,10 +36,14 @@ def start_game(request: Request) -> Response:
         table.initialize_cpu_pieces_position()
         table_serializer = TableSerializer(table)
         serialized_data = table_serializer.data
-        request.session["table"] = serialized_data
+        # request.session["table"] = serialized_data
         json_data = json.dumps(serialized_data)
-        print(json_data)
-        return Response(serialized_data, status=status.HTTP_201_CREATED)
+        # print(json_data)
+        game_state = GameState(game_state=json_data)
+        game_state.save()
+        print(game_state.id)
+        serialized_data_with_id = {**serialized_data, "id": game_state.id}
+        return Response(serialized_data_with_id, status=status.HTTP_201_CREATED)
     else:
         return Response(player_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -39,12 +51,15 @@ def start_game(request: Request) -> Response:
 @api_view(["POST"])
 def get_ready(request: Request) -> Response:
     print("Received data of initial positions")
-    print(f"Session ID get_ready: {request.session.session_key}")
+    # print(f"Session ID get_ready: {request.session.session_key}")
+    # current_table_data = request.session.get("table")
+    # if current_table_data is None:
+    #     return Response(
+    #         {"detail": "Session data not found"}, status=status.HTTP_400_BAD_REQUEST
+    #     )
+
     current_table_data = request.session.get("table")
-    if current_table_data is None:
-        return Response(
-            {"detail": "Session data not found"}, status=status.HTTP_400_BAD_REQUEST
-        )
+
     new_table_data = request.data
     if isinstance(new_table_data, list):
         new_table_data = {
@@ -64,7 +79,7 @@ def get_ready(request: Request) -> Response:
     if table_serializer.is_valid():
         updated_table = table_serializer.save()
         updated_table_serializer = TableSerializer(updated_table)
-        request.session["table"] = TableSerializer(updated_table).data
+        # request.session["table"] = TableSerializer(updated_table).data
         return Response(updated_table_serializer.data, status=status.HTTP_200_OK)
     else:
         return Response(table_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -213,5 +228,5 @@ def cpu_move_piece(request: Request) -> Response:
     table.cpu_move()
     table.switch_turn()
     updated_table = TableSerializer(table).data
-    request.session["table"] = updated_table
+    # request.session["table"] = updated_table
     return Response(updated_table, status=status.HTTP_200_OK)
