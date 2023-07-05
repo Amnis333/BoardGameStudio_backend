@@ -24,6 +24,7 @@ ALLOWED_HOSTS = [
     "BoardGameStudio.ap-northeast-1.elasticbeanstalk.com",
     '172.31.0.254',  # EC2のIPアドレス
     '172.31.4.164',  # EC2のIPアドレス
+    '43.206.196.55',
     'board-game-studio.net',
 ]
 
@@ -108,7 +109,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Tokyo"
 
 USE_I18N = True
 
