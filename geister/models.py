@@ -1,3 +1,5 @@
-# from django.db import models
+from django.db import models
 
-# Create your models here.
+
+class GameState(models.Model):
+    table_state = models.TextField()
