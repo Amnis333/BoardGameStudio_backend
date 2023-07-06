@@ -17,13 +17,6 @@ from .serializers import (
 from .models import GameState
 
 
-@api_view(["GET"])
-def get_game_state(_: Request, game_id: int) -> Response:
-    print("game_id", game_id)
-    game_state = GameState.objects.get(id=game_id)
-    return Response(game_state, status=status.HTTP_200_OK)
-
-
 @api_view(["POST"])
 def start_game(request: Request) -> Response:
     player_data = request.data
