@@ -164,17 +164,24 @@ def get_piece_key_from_players(
 
 @api_view(["POST"])
 def move_piece(request: Request) -> Response:
-    session_table = request.session.get("table")
-    if session_table is None:
-        return Response(
-            {"detail": "Session data not found"}, status=status.HTTP_400_BAD_REQUEST
-        )
-    table, error_response = get_table_serializer(session_table)
+    current_table = GameState.objects.get(id=request.data.get("gameId"))
+    current_table_data = {
+        "players": current_table.players,
+        "winner": current_table.winner,
+        "table": current_table.table,
+        "turn": current_table.turn,
+    }
+    # session_table = request.session.get("table")
+    # if session_table is None:
+    #     return Response(
+    #         {"detail": "Session data not found"}, status=status.HTTP_400_BAD_REQUEST
+    #     )
+    table, error_response = get_table_serializer(current_table_data)
     if error_response:
         return error_response
     if table is None:
         return Response(
-            {"detail": "Session data not found"}, status=status.HTTP_400_BAD_REQUEST
+            {"detail": "falied table deserialize"}, status=status.HTTP_400_BAD_REQUEST
         )
 
     if error_response:
@@ -215,18 +222,31 @@ def move_piece(request: Request) -> Response:
     table.switch_turn()
 
     updated_table = TableSerializer(table).data
-    request.session["table"] = updated_table
+    # request.session["table"] = updated_table
+    # updated_tableの内容をDBに保存
+    current_table.players = updated_table["players"]
+    current_table.winner = updated_table["winner"]
+    current_table.table = updated_table["table"]
+    current_table.turn = updated_table["turn"]
+    current_table.save()
     return Response(updated_table, status=status.HTTP_200_OK)
 
 
 @api_view(["POST"])
 def cpu_move_piece(request: Request) -> Response:
-    session_table = request.session.get("table")
-    if session_table is None:
-        return Response(
-            {"detail": "session_table not found"}, status=status.HTTP_400_BAD_REQUEST
-        )
-    table, error_response = get_table_serializer(session_table)
+    current_table = GameState.objects.get(id=request.data.get("gameId"))
+    current_table_data = {
+        "players": current_table.players,
+        "winner": current_table.winner,
+        "table": current_table.table,
+        "turn": current_table.turn,
+    }
+    # session_table = request.session.get("table")
+    # if session_table is None:
+    #     return Response(
+    #         {"detail": "session_table not found"}, status=status.HTTP_400_BAD_REQUEST
+    #     )
+    table, error_response = get_table_serializer(current_table_data)
     if error_response:
         return error_response
     if table is None:
@@ -237,4 +257,10 @@ def cpu_move_piece(request: Request) -> Response:
     table.switch_turn()
     updated_table = TableSerializer(table).data
     # request.session["table"] = updated_table
+    # updated_tableの内容をDBに保存
+    current_table.players = updated_table["players"]
+    current_table.winner = updated_table["winner"]
+    current_table.table = updated_table["table"]
+    current_table.turn = updated_table["turn"]
+    current_table.save()
     return Response(updated_table, status=status.HTTP_200_OK)
