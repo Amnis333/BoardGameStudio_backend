@@ -13,7 +13,7 @@ from .serializers import (
     BlockSerializer,
 )
 
-import json
+# import json
 from .models import GameState
 
 
@@ -37,9 +37,14 @@ def start_game(request: Request) -> Response:
         table_serializer = TableSerializer(table)
         serialized_data = table_serializer.data
         # request.session["table"] = serialized_data
-        json_data = json.dumps(serialized_data)
+        # json_data = json.dumps(serialized_data)
         # print(json_data)
-        game_state = GameState(game_state=json_data)
+        game_state = GameState(
+            players=serialized_data["players"],
+            table=serialized_data["table"],
+            winner=serialized_data["winner"],
+            turn=serialized_data["turn"],
+        )
         game_state.save()
         print(game_state.id)
         serialized_data_with_id = {**serialized_data, "id": game_state.id}
@@ -51,6 +56,12 @@ def start_game(request: Request) -> Response:
 @api_view(["POST"])
 def get_ready(request: Request) -> Response:
     print("Received data of initial positions")
+    print("----------")
+    print("----------")
+    print("request.data")
+    print(request.data)
+    print("----------")
+    print("----------")
     # print(f"Session ID get_ready: {request.session.session_key}")
     # current_table_data = request.session.get("table")
     # if current_table_data is None:
@@ -58,16 +69,28 @@ def get_ready(request: Request) -> Response:
     #         {"detail": "Session data not found"}, status=status.HTTP_400_BAD_REQUEST
     #     )
 
-    current_table_data = request.session.get("table")
-
-    new_table_data = request.data
-    if isinstance(new_table_data, list):
-        new_table_data = {
-            "players": current_table_data.get("players"),
-            "winner": current_table_data.get("winner", ""),
-            "table": new_table_data,
-            "turn": current_table_data.get("turn"),
-        }
+    # current_table_data = request.session.get("table")
+    current_table_data = GameState.objects.get(id=request.data.get("gameId"))
+    current_table_data.players = request.data.get("players")
+    current_table_data.table = request.data.get("table")
+    current_table_data.winner = request.data.get("winner")
+    current_table_data.turn = request.data.get("turn")
+    print(current_table_data)
+    current_table_data.save()
+    new_table_data = {
+        "players": current_table_data.players,
+        "winner": current_table_data.winner,
+        "table": current_table_data.table,
+        "turn": current_table_data.turn,
+    }
+    # new_table_data = request.data
+    # if isinstance(new_table_data, list):
+    #     new_table_data = {
+    #         "players": current_table_data.get("players"),
+    #         "winner": current_table_data.get("winner", ""),
+    #         "table": new_table_data,
+    #         "turn": current_table_data.get("turn"),
+    #     }
     print("----------")
     print("----------")
     print("new data is following this;")
