@@ -2,8 +2,8 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
-load_dotenv(".env.prod")
-env_path = f".env.{os.getenv('DJANGO_ENV', 'prod')}"
+load_dotenv(".env.dev")
+env_path = f".env.{os.getenv('DJANGO_ENV', 'dev')}"
 load_dotenv(env_path)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -133,11 +133,12 @@ REST_FRAMEWORK = {
 }
 
 CORS_ORIGIN_WHITELIST = [
-    "https://board-game-studio.vercel.app"
+    "https://board-game-studio.vercel.app",
+    "http://localhost:3000",
 ]
 
-SESSION_COOKIE_HTTPONLY = True  # JavaScriptからセッションクッキーにアクセス可能にするため
-SESSION_COOKIE_SAMESITE = "None"  # クロスサイトリクエストにセッションクッキーを含めるため
-SESSION_COOKIE_SECURE = True  # httpsのときだけクッキーを送信する場合はTrueにする。
+SESSION_COOKIE_HTTPONLY = False  # JavaScriptからセッションクッキーにアクセス可能にするため
+SESSION_COOKIE_SAMESITE = "Lax"  # クロスサイトリクエストにセッションクッキーを含めるため
+SESSION_COOKIE_SECURE = False  # httpsのときだけクッキーを送信する場合はTrueにする。
 SESSION_SAVE_EVERY_REQUEST = True  # すべてのリクエストでセッション情報を保存する
 CORS_ALLOW_CREDENTIALS = True
