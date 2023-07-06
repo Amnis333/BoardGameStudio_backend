@@ -62,35 +62,21 @@ def get_ready(request: Request) -> Response:
     print(request.data)
     print("----------")
     print("----------")
-    # print(f"Session ID get_ready: {request.session.session_key}")
-    # current_table_data = request.session.get("table")
-    # if current_table_data is None:
-    #     return Response(
-    #         {"detail": "Session data not found"}, status=status.HTTP_400_BAD_REQUEST
-    #     )
-
-    # current_table_data = request.session.get("table")
     current_table_data = GameState.objects.get(id=request.data.get("gameId"))
+    # request.dataで受け取ったデータをcurrent_table_dataに反映させる
     current_table_data.players = request.data.get("players")
     current_table_data.table = request.data.get("table")
     current_table_data.winner = request.data.get("winner")
     current_table_data.turn = request.data.get("turn")
     print(current_table_data)
     current_table_data.save()
+    # current_table_dataをシリアライズして返す
     new_table_data = {
         "players": current_table_data.players,
         "winner": current_table_data.winner,
         "table": current_table_data.table,
         "turn": current_table_data.turn,
     }
-    # new_table_data = request.data
-    # if isinstance(new_table_data, list):
-    #     new_table_data = {
-    #         "players": current_table_data.get("players"),
-    #         "winner": current_table_data.get("winner", ""),
-    #         "table": new_table_data,
-    #         "turn": current_table_data.get("turn"),
-    #     }
     print("----------")
     print("----------")
     print("new data is following this;")
@@ -102,7 +88,6 @@ def get_ready(request: Request) -> Response:
     if table_serializer.is_valid():
         updated_table = table_serializer.save()
         updated_table_serializer = TableSerializer(updated_table)
-        # request.session["table"] = TableSerializer(updated_table).data
         return Response(updated_table_serializer.data, status=status.HTTP_200_OK)
     else:
         return Response(table_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
