@@ -9,7 +9,6 @@ load_dotenv(env_path)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -22,8 +21,8 @@ DEBUG = True
 ALLOWED_HOSTS = [
     "https://board-game-studio.vercel.app",
     "BoardGameStudio.ap-northeast-1.elasticbeanstalk.com",
-    "board-game-studio.net",
-    "localhost",
+    '172.31.37.77',  # EC2のIPアドレス
+    'board-game-studio.net',
 ]
 
 # Application definition
@@ -107,7 +106,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Tokyo"
 
 USE_I18N = True
 

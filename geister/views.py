@@ -24,6 +24,10 @@ def get_game_state(_: Request, game_id: int) -> Response:
     return Response(game_state, status=status.HTTP_200_OK)
 
 
+@api_view(["GET"])
+def test(request: Request) -> Response:
+    return Response({"message": "Hello, world!"}, status=status.HTTP_200_OK)
+
 @api_view(["POST"])
 def start_game(request: Request) -> Response:
     player_data = request.data
