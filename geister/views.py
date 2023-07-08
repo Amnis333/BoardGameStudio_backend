@@ -16,9 +16,11 @@ from .serializers import (
 # import json
 from .models import GameState
 
+
 @api_view(["GET"])
 def test(request: Request) -> Response:
-    return Response({"message": "Hello, Django!"}, status=status.HTTP_200_OK)
+    return Response({"message": "Hello, world!"}, status=status.HTTP_200_OK)
+
 
 @api_view(["POST"])
 def start_game(request: Request) -> Response:
