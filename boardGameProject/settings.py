@@ -2,13 +2,12 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
-load_dotenv(".env.prod")
-env_path = f".env.{os.getenv('DJANGO_ENV', 'prod')}"
+load_dotenv(".env.dev")
+env_path = f".env.{os.getenv('DJANGO_ENV', 'dev')}"
 load_dotenv(env_path)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -75,13 +74,24 @@ WSGI_APPLICATION = "boardGameProject.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
+if 'RDS_HOSTNAME' in os.environ:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'USER': os.environ['RDS_USERNAME'],
+            'PASSWORD': os.environ['RDS_PASSWORD'],
+            'HOST': os.environ['RDS_HOSTNAME'],
+            'PORT': os.environ['RDS_PORT'],
+        }
     }
-}
-
+else:
+    raise KeyError("RDS_HOSTNAME is not defined in os.environ")
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -134,11 +144,12 @@ REST_FRAMEWORK = {
 }
 
 CORS_ORIGIN_WHITELIST = [
-    "https://board-game-studio.vercel.app"
+    "https://board-game-studio.vercel.app",
+    "http://localhost:3000",
 ]
 
-SESSION_COOKIE_HTTPONLY = True  # JavaScriptからセッションクッキーにアクセス可能にするため
-SESSION_COOKIE_SAMESITE = "None"  # クロスサイトリクエストにセッションクッキーを含めるため
-SESSION_COOKIE_SECURE = True  # httpsのときだけクッキーを送信する場合はTrueにする。
+SESSION_COOKIE_HTTPONLY = False  # JavaScriptからセッションクッキーにアクセス可能にするため
+SESSION_COOKIE_SAMESITE = "Lax"  # クロスサイトリクエストにセッションクッキーを含めるため
+SESSION_COOKIE_SECURE = False  # httpsのときだけクッキーを送信する場合はTrueにする。
 SESSION_SAVE_EVERY_REQUEST = True  # すべてのリクエストでセッション情報を保存する
 CORS_ALLOW_CREDENTIALS = True
