@@ -23,6 +23,7 @@ ALLOWED_HOSTS = [
     "BoardGameStudio.ap-northeast-1.elasticbeanstalk.com",
     '172.31.37.77',  # EC2のIPアドレス
     'board-game-studio.net',
+    os.environ["RDS_HOSTNAME"]  # RDSのエンドポイント
 ]
 
 # Application definition
