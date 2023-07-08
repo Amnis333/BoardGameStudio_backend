@@ -83,7 +83,7 @@ WSGI_APPLICATION = "boardGameProject.wsgi.application"
 if 'RDS_HOSTNAME' in os.environ:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.mysql',
+            'ENGINE': 'mysql.connector.django',
             'USER': os.environ['RDS_USERNAME'],
             'PASSWORD': os.environ['RDS_PASSWORD'],
             'HOST': os.environ['RDS_HOSTNAME'],
