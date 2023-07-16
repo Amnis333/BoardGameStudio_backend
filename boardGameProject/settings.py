@@ -2,8 +2,8 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
-load_dotenv(".env.dev")
-env_path = f".env.{os.getenv('DJANGO_ENV', 'dev')}"
+load_dotenv(".env.prod")
+env_path = f".env.{os.getenv('DJANGO_ENV', 'prod')}"
 load_dotenv(env_path)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -23,6 +23,7 @@ ALLOWED_HOSTS = [
     "BoardGameStudio.ap-northeast-1.elasticbeanstalk.com",
     '172.31.37.77',  # EC2のIPアドレス
     'board-game-studio.net',
+    os.environ["RDS_HOSTNAME"]  # RDSのエンドポイント
 ]
 
 # Application definition
@@ -83,11 +84,15 @@ WSGI_APPLICATION = "boardGameProject.wsgi.application"
 if 'RDS_HOSTNAME' in os.environ:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.mysql',
+            'ENGINE': 'mysql.connector.django',
+            'NAME': os.environ['RDS_DB_NAME'],
             'USER': os.environ['RDS_USERNAME'],
             'PASSWORD': os.environ['RDS_PASSWORD'],
             'HOST': os.environ['RDS_HOSTNAME'],
             'PORT': os.environ['RDS_PORT'],
+            'OPTIONS': {
+                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            },
         }
     }
 else:
@@ -145,11 +150,10 @@ REST_FRAMEWORK = {
 
 CORS_ORIGIN_WHITELIST = [
     "https://board-game-studio.vercel.app",
-    "http://localhost:3000",
 ]
 
-SESSION_COOKIE_HTTPONLY = False  # JavaScriptからセッションクッキーにアクセス可能にするため
-SESSION_COOKIE_SAMESITE = "Lax"  # クロスサイトリクエストにセッションクッキーを含めるため
-SESSION_COOKIE_SECURE = False  # httpsのときだけクッキーを送信する場合はTrueにする。
+SESSION_COOKIE_HTTPONLY = True  # JavaScriptからセッションクッキーにアクセス可能にするため
+SESSION_COOKIE_SAMESITE = "None"  # クロスサイトリクエストにセッションクッキーを含めるため
+SESSION_COOKIE_SECURE = True  # httpsのときだけクッキーを送信する場合はTrueにする。
 SESSION_SAVE_EVERY_REQUEST = True  # すべてのリクエストでセッション情報を保存する
 CORS_ALLOW_CREDENTIALS = True

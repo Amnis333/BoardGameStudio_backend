@@ -13,7 +13,6 @@ from .serializers import (
     BlockSerializer,
 )
 
-
 from .models import GameState
 
 
