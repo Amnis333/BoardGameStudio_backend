@@ -13,7 +13,6 @@ from .serializers import (
     BlockSerializer,
 )
 
-# import json
 from .models import GameState
 
 
@@ -34,9 +33,6 @@ def start_game(request: Request) -> Response:
         table.initialize_cpu_pieces_position()
         table_serializer = TableSerializer(table)
         serialized_data = table_serializer.data
-        # request.session["table"] = serialized_data
-        # json_data = json.dumps(serialized_data)
-        # print(json_data)
         game_state = GameState(
             players=serialized_data["players"],
             table=serialized_data["table"],
@@ -169,11 +165,7 @@ def move_piece(request: Request) -> Response:
         "table": current_table.table,
         "turn": current_table.turn,
     }
-    # session_table = request.session.get("table")
-    # if session_table is None:
-    #     return Response(
-    #         {"detail": "Session data not found"}, status=status.HTTP_400_BAD_REQUEST
-    #     )
+
     table, error_response = get_table_serializer(current_table_data)
     if error_response:
         return error_response
@@ -239,11 +231,7 @@ def cpu_move_piece(request: Request) -> Response:
         "table": current_table.table,
         "turn": current_table.turn,
     }
-    # session_table = request.session.get("table")
-    # if session_table is None:
-    #     return Response(
-    #         {"detail": "session_table not found"}, status=status.HTTP_400_BAD_REQUEST
-    #     )
+
     table, error_response = get_table_serializer(current_table_data)
     if error_response:
         return error_response
@@ -254,7 +242,6 @@ def cpu_move_piece(request: Request) -> Response:
     table.cpu_move()
     table.switch_turn()
     updated_table = TableSerializer(table).data
-    # request.session["table"] = updated_table
     # updated_tableの内容をDBに保存
     current_table.players = updated_table["players"]
     current_table.winner = updated_table["winner"]
