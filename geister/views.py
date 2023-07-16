@@ -48,7 +48,7 @@ def start_game(request: Request) -> Response:
 
 
 @api_view(["POST"])
-def get_ready(request: Request) -> Response:
+def get_ready(request: Request, game_id: int) -> Response:
     print("Received data of initial positions")
     print("----------")
     print("----------")
@@ -56,7 +56,7 @@ def get_ready(request: Request) -> Response:
     print(request.data)
     print("----------")
     print("----------")
-    current_table_data = GameState.objects.get(id=request.data.get("gameId"))
+    current_table_data = GameState.objects.get(id=game_id)
     # request.dataで受け取ったデータをcurrent_table_dataに反映させる
     current_table_data.players = request.data.get("players")
     current_table_data.table = request.data.get("table")
@@ -157,15 +157,14 @@ def get_piece_key_from_players(
 
 
 @api_view(["POST"])
-def move_piece(request: Request) -> Response:
-    current_table = GameState.objects.get(id=request.data.get("gameId"))
+def move_piece(request: Request, game_id: int) -> Response:
+    current_table = GameState.objects.get(id=game_id)
     current_table_data = {
         "players": current_table.players,
         "winner": current_table.winner,
         "table": current_table.table,
         "turn": current_table.turn,
     }
-
     table, error_response = get_table_serializer(current_table_data)
     if error_response:
         return error_response
@@ -212,7 +211,6 @@ def move_piece(request: Request) -> Response:
     table.switch_turn()
 
     updated_table = TableSerializer(table).data
-    # request.session["table"] = updated_table
     # updated_tableの内容をDBに保存
     current_table.players = updated_table["players"]
     current_table.winner = updated_table["winner"]
@@ -223,15 +221,14 @@ def move_piece(request: Request) -> Response:
 
 
 @api_view(["POST"])
-def cpu_move_piece(request: Request) -> Response:
-    current_table = GameState.objects.get(id=request.data.get("gameId"))
+def cpu_move_piece(request: Request, game_id: int) -> Response:
+    current_table = GameState.objects.get(id=game_id)
     current_table_data = {
         "players": current_table.players,
         "winner": current_table.winner,
         "table": current_table.table,
         "turn": current_table.turn,
     }
-
     table, error_response = get_table_serializer(current_table_data)
     if error_response:
         return error_response

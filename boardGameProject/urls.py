@@ -20,9 +20,9 @@ from geister.views import test, move_piece, start_game, get_ready, cpu_move_piec
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("start/", start_game, name="start"),
     path("test/", test, name="test"),
-    path("setup/", get_ready, name="setup"),
-    path("movement/", move_piece, name="movement"),
-    path("cpu-movement/", cpu_move_piece, name="cpu-movement"),
+    path("geister/start/", start_game, name="start"),
+    path("geister/<int:game_id>/setup/", get_ready, name="setup"),
+    path("geister/<int:game_id>/player-move/", move_piece, name="movement"),
+    path("geister/<int:game_id>/cpu-move/", cpu_move_piece, name="cpu-movement"),
 ]
