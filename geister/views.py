@@ -13,6 +13,7 @@ from .serializers import (
     BlockSerializer,
 )
 
+
 from .models import GameState
 
 
@@ -165,7 +166,6 @@ def move_piece(request: Request, game_id: int) -> Response:
         "table": current_table.table,
         "turn": current_table.turn,
     }
-
     table, error_response = get_table_serializer(current_table_data)
     if error_response:
         return error_response
@@ -230,7 +230,6 @@ def cpu_move_piece(request: Request, game_id: int) -> Response:
         "table": current_table.table,
         "turn": current_table.turn,
     }
-
     table, error_response = get_table_serializer(current_table_data)
     if error_response:
         return error_response
