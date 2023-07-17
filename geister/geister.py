@@ -260,6 +260,7 @@ class Table:
             raise ValueError("移動先を指定してください")
         # 仮置き オンライン対戦時に名前の衝突が起きた場合バグを生む可能性
         # この実装では脱出可能なマスにコマがある場合、次のターンで自動的に勝利になる
+        # todo 赤の4つ目をとっても脱出可能なマスがあると勝利になるバグがある
         if self._is_escapable(self.__turn):
             self.__winner = self.__players[self.__turn].get_name()
             return
@@ -305,9 +306,30 @@ class Table:
 
     def cpu_move(self) -> None:
         print("----------cpu_move----------")
+        """
+        to do
+        コマを選択するロジックを分離する
+        難易度別にコマを選択するロジックを決定する
+        """
         # cpuのコマを選択
         while True:
             piece_key: str = ""
+            # 脱出を阻止しようとするロジック
+            piece_list_nearby_escape_block: list[
+                Piece
+            ] = self._search_opponent_piece_nearby_escape_block()
+            if len(piece_list_nearby_escape_block) > 0:
+                (
+                    piece_key,
+                    cpu_piece,
+                    piece_attempt_to_escape,
+                ) = self._search_closest_piece_and_target_to_prevent_from_escaping(
+                    piece_list_nearby_escape_block
+                )
+                destination = self._decide_destination_to_prevent_from_escaping(
+                    cpu_piece, piece_attempt_to_escape
+                )
+            # 青のコマを取るロジック
             if self.__players[1].get_picked_red_pieces_count() < 3:
                 (
                     piece_key,
@@ -391,6 +413,7 @@ class Table:
                     ]
                     does_capture = True
                     break
+        # todo ランダムに選択するロジックは分離する
         # 射程内に青のコマがなかったらランダムに選択
         if cpu_piece is None:
             cpu_piece = random.choice(list(self.__players[1].pieces.values()))
