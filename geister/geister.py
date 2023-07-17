@@ -405,6 +405,25 @@ class Table:
             destination = self.__table[destination_y][destination_x]
         return (cpu_piece_key, cpu_piece, destination, does_capture)
 
+    # 脱出マスから3マス以内に相手のコマがいるかどうかを判定するメソッド
+    def _is_opponent_piece_nearby_escape_block(self) -> bool:
+        opponent_turn = 1 if self.__turn == 0 else 0
+        opponent_escape_blocks: list[tuple[int, int]] = self.__escapable_positions[
+            opponent_turn
+        ]
+        for opponent_escape_block in opponent_escape_blocks:
+            for piece in self.__players[opponent_turn].pieces.values():
+                piece_position = piece.get_position()
+                if piece_position is None:
+                    raise ValueError("pieceのpositionがNoneです")
+                if (
+                    abs(piece_position[0] - opponent_escape_block[0])
+                    + abs(piece_position[1] - opponent_escape_block[1])
+                    <= 3
+                ):
+                    return True
+        return False
+
     # CPUが選択したコマが移動可能かどうかを判定するメソッド（プレイヤーの移動チェックはフロントエンドで行う）
     def is_movable(self, piece: Piece, destination: Block) -> bool:
         # 現在位置の上下左右1マスより離れていたら移動不可
