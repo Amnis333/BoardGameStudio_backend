@@ -424,10 +424,10 @@ class Table:
     # piece_list_nearby_escape_blockの中で最も近いコマを奪いにいく
     def _search_closest_piece_and_target_to_prevent_from_escaping(
         self, piece_list_nearby_escape_block: list[Piece]
-    ) -> tuple[Piece, Piece]:
+    ) -> tuple[str, Piece, Piece]:
         # 最大で距離が14なので、それより大きい値を初期値に設定
         distance: int = 15
-        for piece in self.__players[self.__turn].pieces.values():
+        for piece_key, piece in self.__players[self.__turn].pieces.items():
             piece_position: Optional[list[int]] = piece.get_position()
             if piece_position is None:
                 raise ValueError("pieceのpositionがNoneです")
@@ -443,16 +443,21 @@ class Table:
                     distance = abs(
                         piece_position[0] - opponent_piece_position[0]
                     ) + abs(piece_position[1] - opponent_piece_position[1])
+                    selected_piece_key = piece_key
                     selected_piece = piece
                     target = opponent_piece
         # 一度も距離が更新されなかった場合はエラーを返す
+        if not isinstance(selected_piece_key, str):
+            raise UnboundLocalError(
+                "selected_piece_keyがstr型ではありません。全てのコマが取られている可能性があります。"
+            )
         if not isinstance(selected_piece, Piece):
             raise UnboundLocalError(
                 "selected_pieceがPiece型ではありません。全てのコマが取られている可能性があります。"
             )
         if not isinstance(target, Piece):
             raise UnboundLocalError("targetがPiece型ではありません。全てのコマが取られている可能性があります。")
-        return selected_piece, target
+        return selected_piece_key, selected_piece, target
 
     # selected_pieceがtargetを取りに行くための移動先を決定するメソッド
     # selected_pieceがtargetに最も近づくマスを返す
@@ -472,7 +477,7 @@ class Table:
             [selected_piece_position[1] + 1, selected_piece_position[0]],
             [selected_piece_position[1] - 1, selected_piece_position[0]],
             [selected_piece_position[1], selected_piece_position[0] + 1],
-            [selected_piece_position[1], selected_piece_position[0] - 1]
+            [selected_piece_position[1], selected_piece_position[0] - 1],
         ]
         for canditate_location in candidate_location_list:
             if (
