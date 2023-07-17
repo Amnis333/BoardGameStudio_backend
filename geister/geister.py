@@ -261,12 +261,7 @@ class Table:
         # 仮置き オンライン対戦時に名前の衝突が起きた場合バグを生む可能性
         # この実装では脱出可能なマスにコマがある場合、次のターンで自動的に勝利になる
         if self._is_escapable(self.__turn):
-            # todo 脱出に成功したというポップアップを出す
-            # print("----------escapable----------")
             self.__winner = self.__players[self.__turn].get_name()
-            # ここでフロントエンドと通信を行う
-            # 通信を行うのはviews.pyの役割なのでモデルからは直接通信しないこと
-            # ここで関数を抜けるとviews.pyに戻り、そこで通信を行う
             return
 
         # 移動元のブロックからコマを削除
@@ -405,12 +400,13 @@ class Table:
             destination = self.__table[destination_y][destination_x]
         return (cpu_piece_key, cpu_piece, destination, does_capture)
 
-    # 脱出マスから3マス以内に相手のコマがいるかどうかを判定するメソッド
-    def _is_opponent_piece_nearby_escape_block(self) -> bool:
+    # 脱出マスから3マス以内に存在する相手のコマのリストを返すメソッド
+    def _search_opponent_piece_nearby_escape_block(self) -> list[Piece]:
         opponent_turn = 1 if self.__turn == 0 else 0
         opponent_escape_blocks: list[tuple[int, int]] = self.__escapable_positions[
             opponent_turn
         ]
+        piece_list_nearby_escape_block: list[Piece] = []
         for opponent_escape_block in opponent_escape_blocks:
             for piece in self.__players[opponent_turn].pieces.values():
                 piece_position = piece.get_position()
@@ -421,8 +417,78 @@ class Table:
                     + abs(piece_position[1] - opponent_escape_block[1])
                     <= 3
                 ):
-                    return True
-        return False
+                    piece_list_nearby_escape_block.append(piece)
+        return piece_list_nearby_escape_block
+
+    # 脱出マスに近づいた相手のマスを取りに行くためのコマを選択するメソッド
+    # piece_list_nearby_escape_blockの中で最も近いコマを奪いにいく
+    def _search_closest_piece_and_target_to_prevent_from_escaping(
+        self, piece_list_nearby_escape_block: list[Piece]
+    ) -> tuple[Piece, Piece]:
+        # 最大で距離が14なので、それより大きい値を初期値に設定
+        distance: int = 15
+        for piece in self.__players[self.__turn].pieces.values():
+            piece_position: Optional[list[int]] = piece.get_position()
+            if piece_position is None:
+                raise ValueError("pieceのpositionがNoneです")
+            for opponent_piece in piece_list_nearby_escape_block:
+                opponent_piece_position = opponent_piece.get_position()
+                if opponent_piece_position is None:
+                    raise ValueError("opponent_pieceのpositionがNoneです")
+                if (
+                    abs(piece_position[0] - opponent_piece_position[0])
+                    + abs(piece_position[1] - opponent_piece_position[1])
+                    < distance
+                ):
+                    distance = abs(
+                        piece_position[0] - opponent_piece_position[0]
+                    ) + abs(piece_position[1] - opponent_piece_position[1])
+                    selected_piece = piece
+                    target = opponent_piece
+        # 一度も距離が更新されなかった場合はエラーを返す
+        if not isinstance(selected_piece, Piece):
+            raise UnboundLocalError(
+                "selected_pieceがPiece型ではありません。全てのコマが取られている可能性があります。"
+            )
+        if not isinstance(target, Piece):
+            raise UnboundLocalError("targetがPiece型ではありません。全てのコマが取られている可能性があります。")
+        return selected_piece, target
+
+    # selected_pieceがtargetを取りに行くための移動先を決定するメソッド
+    # selected_pieceがtargetに最も近づくマスを返す
+    def _decide_destination_to_prevent_from_escaping(
+        self, selected_piece: Piece, target: Piece
+    ) -> Block:
+        selected_piece_position: Optional[list[int]] = selected_piece.get_position()
+        if selected_piece_position is None:
+            raise ValueError("selected_pieceのpositionがNoneです")
+        target_position: Optional[list[int]] = target.get_position()
+        if target_position is None:
+            raise ValueError("targetのpositionがNoneです")
+        distance: int = abs(selected_piece_position[0] - target_position[0]) + abs(
+            selected_piece_position[1] - target_position[1]
+        )
+        candidate_location_list: list[list[int]] = [
+            [selected_piece_position[1] + 1, selected_piece_position[0]],
+            [selected_piece_position[1] - 1, selected_piece_position[0]],
+            [selected_piece_position[1], selected_piece_position[0] + 1],
+            [selected_piece_position[1], selected_piece_position[0] - 1]
+        ]
+        for canditate_location in candidate_location_list:
+            if (
+                0 <= canditate_location[0] <= 7
+                and 0 <= canditate_location[1] <= 7
+                and abs(canditate_location[0] - target_position[0])
+                + abs(canditate_location[1] - target_position[1])
+                < distance
+            ):
+                distance = abs(canditate_location[0] - target_position[0]) + abs(
+                    canditate_location[1] - target_position[1]
+                )
+                destination = self.__table[canditate_location[0]][canditate_location[1]]
+        if not isinstance(destination, Block):
+            raise UnboundLocalError("移動可能なマスがありません。")
+        return destination
 
     # CPUが選択したコマが移動可能かどうかを判定するメソッド（プレイヤーの移動チェックはフロントエンドで行う）
     def is_movable(self, piece: Piece, destination: Block) -> bool:
